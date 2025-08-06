@@ -4,6 +4,7 @@ import { QuickActions } from "@/components/dashboard/QuickActions";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 import { CreditCardInvoices } from "@/components/dashboard/CreditCardInvoices";
 import { useData } from "@/contexts/DataContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   Wallet, 
   TrendingUp, 
@@ -21,12 +22,27 @@ const Index = () => {
     getMonthlyExpenses,
     getNetWorth
   } = useData();
+  
+  const { user } = useAuth();
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
     }).format(amount);
+  };
+
+  // Função para obter saudação baseada no horário
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Bom dia';
+    if (hour < 18) return 'Boa tarde';
+    return 'Boa noite';
+  };
+
+  // Pegar apenas o primeiro nome
+  const getFirstName = (fullName: string) => {
+    return fullName.split(' ')[0];
   };
 
   const monthlyIncome = getMonthlyIncome();
@@ -86,11 +102,41 @@ const Index = () => {
   return (
     <MainLayout>
       <div className="space-y-6">
-        {/* Página de Dashboard */}
+        {/* Saudação Personalizada */}
+        <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg p-6 border border-border">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">
+                {getGreeting()}, {user?.name ? getFirstName(user.name) : ''}! 👋
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Aqui está um resumo das suas finanças hoje
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-muted-foreground">
+                {new Date().toLocaleDateString('pt-BR', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {new Date().toLocaleTimeString('pt-BR', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Dashboard Header */}
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">
+          <h2 className="text-xl font-semibold text-foreground mb-2">
             Dashboard Financeiro
-          </h1>
+          </h2>
           <p className="text-muted-foreground">
             Visão geral das suas finanças pessoais e empresariais
           </p>

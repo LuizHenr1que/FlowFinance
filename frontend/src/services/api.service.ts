@@ -76,6 +76,22 @@ class ApiService {
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.log('❌ Error data:', errorData);
+        
+        // Se for erro 401 (não autorizado), o token pode ter expirado
+        if (response.status === 401) {
+          console.log('🔓 Token expirado, removendo sessão');
+          this.removeToken();
+          // Recarregar a página para forçar o redirecionamento para login
+          window.location.href = '/login';
+          return {
+            error: {
+              message: 'Sessão expirada. Faça login novamente.',
+              statusCode: 401,
+              error: 'UNAUTHORIZED',
+            },
+          };
+        }
+        
         return {
           error: {
             message: errorData.message || 'Erro na requisição',
@@ -133,8 +149,27 @@ class ApiService {
   }
 
   getUserData(): User | null {
-    const userData = localStorage.getItem('user');
-    return userData ? JSON.parse(userData) : null;
+    try {
+      const userData = localStorage.getItem('user');
+      if (!userData) return null;
+      
+      const parsed = JSON.parse(userData);
+      // Verificar se tem as propriedades básicas necessárias
+      if (parsed && parsed.id && parsed.email && parsed.name) {
+        return parsed;
+      }
+      return null;
+    } catch (error) {
+      console.error('Erro ao recuperar dados do usuário:', error);
+      return null;
+    }
+  }
+
+  // Verificar se há uma sessão válida
+  hasValidSession(): boolean {
+    const token = this.getToken();
+    const user = this.getUserData();
+    return !!(token && user);
   }
 }
 

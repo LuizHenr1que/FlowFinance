@@ -191,7 +191,7 @@ export function AppSidebar() {
                 <span className="text-primary-foreground font-bold text-base">F</span>
               </div>
               <div>
-                <h1 className="font-bold text-lg text-foreground">FinanceApp</h1>
+                <h1 className="font-bold text-lg text-foreground">FlowFinance</h1>
                 <p className="text-xs text-muted-foreground">Gestão Financeira</p>
               </div>
             </div>

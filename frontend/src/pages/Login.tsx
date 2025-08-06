@@ -38,7 +38,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const result = await login({ email, password });
+      const result = await login(email, password);
       
       if (result.success) {
         if (rememberLogin) {
@@ -214,13 +214,7 @@ const Login = () => {
             </p>
           </div>
 
-          <div className="mt-6 p-4 bg-muted/50 rounded-lg border border-border">
-            <p className="text-sm text-muted-foreground text-center">
-              <strong>Credenciais de teste:</strong><br />
-              Email: <code className="bg-background px-1 rounded">admin@teste.com</code><br />
-              Senha: <code className="bg-background px-1 rounded">12345</code>
-            </p>
-          </div>
+          
         </CardContent>
       </Card>
     </div>

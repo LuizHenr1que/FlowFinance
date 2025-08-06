@@ -20,7 +20,7 @@ interface MainLayoutProps {
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -29,6 +29,15 @@ export function MainLayout({ children }: MainLayoutProps) {
 
   const handleSettings = () => {
     navigate('/settings');
+  };
+
+  // Gerar iniciais do nome para o avatar
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase())
+      .slice(0, 2)
+      .join('');
   };
 
   return (
@@ -58,7 +67,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                     >
                       <Avatar className="h-9 w-9">
                         <AvatarFallback className="bg-primary text-primary-foreground">
-                          A
+                          {user?.name ? getInitials(user.name) : 'U'}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
@@ -70,9 +79,11 @@ export function MainLayout({ children }: MainLayoutProps) {
                   >
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">Administrador</p>
+                        <p className="text-sm font-medium leading-none">
+                          {user?.name || 'Usuário'}
+                        </p>
                         <p className="text-xs leading-none text-muted-foreground">
-                          adm@sistema.com
+                          {user?.email || 'email@exemplo.com'}
                         </p>
                       </div>
                     </DropdownMenuLabel>
