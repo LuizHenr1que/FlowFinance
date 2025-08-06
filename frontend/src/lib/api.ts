@@ -57,7 +57,7 @@ class ApiService {
     // Request interceptor para adicionar token
     this.axiosInstance.interceptors.request.use((config) => {
       const token = localStorage.getItem('access_token');
-      if (token && !config.url?.includes('/auth/login') && !config.url?.includes('/auth/register')) {
+      if (token && !config.url?.includes('/auth/login') && !config.url?.includes('/users')) {
         config.headers.Authorization = `Bearer ${token}`;
       }
       return config;
@@ -68,6 +68,13 @@ class ApiService {
       (response) => response,
       async (error: AxiosError) => {
         const originalRequest = error.config as typeof error.config & { _retry?: boolean };
+
+        // Não interferir em rotas de autenticação
+        if (originalRequest.url?.includes('/auth/login') || 
+            originalRequest.url?.includes('/users') ||
+            originalRequest.url?.includes('/auth/register')) {
+          return Promise.reject(error);
+        }
 
         if (error.response?.status === 401 && !originalRequest._retry) {
           if (originalRequest.url?.includes('/auth/refresh')) {
@@ -145,12 +152,20 @@ class ApiService {
   }
 
   async register(name: string, email: string, password: string): Promise<LoginResponse> {
-    const response = await this.axiosInstance.post<LoginResponse>('/auth/register', {
+    // Primeiro criar o usuário
+    await this.axiosInstance.post('/users', {
       name,
       email,
       password,
     });
-    return response.data;
+    
+    // Depois fazer login automaticamente para obter os tokens
+    const loginResponse = await this.axiosInstance.post<LoginResponse>('/auth/login', {
+      email,
+      password,
+    });
+    
+    return loginResponse.data;
   }
 
   async logout(): Promise<{ message: string }> {

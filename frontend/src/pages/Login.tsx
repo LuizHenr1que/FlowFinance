@@ -35,6 +35,10 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+    
+    if (isLoading) return; // Previne múltiplos cliques
+    
     setIsLoading(true);
 
     try {
@@ -55,8 +59,9 @@ const Login = () => {
           title: "Login realizado com sucesso!",
           description: "Bem-vindo ao sistema de gestão financeira.",
         });
-        navigate('/');
+        navigate('/', { replace: true });
       } else {
+        // Não navegar em caso de erro, apenas mostrar o toast
         toast({
           variant: "destructive",
           title: "Erro no login",
@@ -64,14 +69,15 @@ const Login = () => {
         });
       }
     } catch (error) {
+      // Não navegar em caso de erro, apenas mostrar o toast
       toast({
         variant: "destructive",
         title: "Erro de conexão",
         description: "Não foi possível conectar ao servidor. Tente novamente.",
       });
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   const handleGoogleLogin = async () => {

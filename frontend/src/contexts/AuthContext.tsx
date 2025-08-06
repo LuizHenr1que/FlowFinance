@@ -75,11 +75,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(response.user);
       
       return { success: true };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erro no login:', error);
+      
+      // Tratar diferentes tipos de erro
+      let errorMessage = 'Erro de conexão. Tente novamente.';
+      
+      if (error && typeof error === 'object' && 'response' in error) {
+        // Erro da API (4xx, 5xx)
+        const axiosError = error as { response: { status: number; data: { message?: string } } };
+        const { status, data } = axiosError.response;
+        
+        if (status === 401) {
+          errorMessage = 'Email ou senha incorretos.';
+        } else if (status === 400) {
+          errorMessage = 'Dados inválidos. Verifique as informações.';
+        } else if (data && data.message) {
+          errorMessage = data.message;
+        }
+      } else if (error && typeof error === 'object' && 'request' in error) {
+        // Erro de rede
+        errorMessage = 'Erro de conexão. Verifique sua internet.';
+      }
+      
       return { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Erro de conexão. Tente novamente.' 
+        error: errorMessage
       };
     } finally {
       setIsLoading(false);
@@ -100,11 +121,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(response.user);
       
       return { success: true };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erro no registro:', error);
+      
+      // Tratar diferentes tipos de erro
+      let errorMessage = 'Erro de conexão. Tente novamente.';
+      
+      if (error && typeof error === 'object' && 'response' in error) {
+        // Erro da API (4xx, 5xx)
+        const axiosError = error as { response: { status: number; data: { message?: string } } };
+        const { status, data } = axiosError.response;
+        
+        if (status === 409) {
+          errorMessage = 'Este email já está em uso.';
+        } else if (status === 400) {
+          errorMessage = 'Dados inválidos. Verifique as informações.';
+        } else if (status === 401) {
+          errorMessage = 'Email ou senha incorretos.';
+        } else if (data && data.message) {
+          errorMessage = data.message;
+        }
+      } else if (error && typeof error === 'object' && 'request' in error) {
+        // Erro de rede
+        errorMessage = 'Erro de conexão. Verifique sua internet.';
+      }
+      
       return { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Erro de conexão. Tente novamente.' 
+        error: errorMessage
       };
     } finally {
       setIsLoading(false);
