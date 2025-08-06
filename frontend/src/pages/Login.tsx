@@ -37,31 +37,37 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const success = login(email, password);
-    
-    if (success) {
-      if (rememberLogin) {
-        localStorage.setItem('rememberedEmail', email);
-        localStorage.setItem('rememberedPassword', password);
-        localStorage.setItem('rememberLogin', 'true');
-      } else {
-        localStorage.removeItem('rememberedEmail');
-        localStorage.removeItem('rememberedPassword');
-        localStorage.removeItem('rememberLogin');
-      }
+    try {
+      const result = await login({ email, password });
       
-      toast({
-        title: "Login realizado com sucesso!",
-        description: "Bem-vindo ao sistema de gestão financeira.",
-      });
-      navigate('/');
-    } else {
+      if (result.success) {
+        if (rememberLogin) {
+          localStorage.setItem('rememberedEmail', email);
+          localStorage.setItem('rememberedPassword', password);
+          localStorage.setItem('rememberLogin', 'true');
+        } else {
+          localStorage.removeItem('rememberedEmail');
+          localStorage.removeItem('rememberedPassword');
+          localStorage.removeItem('rememberLogin');
+        }
+        
+        toast({
+          title: "Login realizado com sucesso!",
+          description: "Bem-vindo ao sistema de gestão financeira.",
+        });
+        navigate('/');
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Erro no login",
+          description: result.error || "Credenciais inválidas. Tente novamente.",
+        });
+      }
+    } catch (error) {
       toast({
         variant: "destructive",
-        title: "Credenciais inválidas",
-        description: "Email ou senha incorretos. Tente novamente.",
+        title: "Erro de conexão",
+        description: "Não foi possível conectar ao servidor. Tente novamente.",
       });
     }
     

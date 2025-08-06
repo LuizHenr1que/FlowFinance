@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
@@ -20,6 +21,7 @@ const Register = () => {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const { register } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -54,16 +56,33 @@ const Register = () => {
 
     setIsLoading(true);
 
-    // Simular delay de cadastro
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      const result = await register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      });
 
-    toast({
-      title: "Conta criada com sucesso!",
-      description: "Seja bem-vindo ao sistema de gestão financeira.",
-    });
-
-    // Redirecionar para login após cadastro
-    navigate('/login');
+      if (result.success) {
+        toast({
+          title: "Conta criada com sucesso!",
+          description: "Seja bem-vindo ao sistema de gestão financeira.",
+        });
+        navigate('/login');
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Erro ao criar conta",
+          description: result.error || "Ocorreu um erro inesperado. Tente novamente.",
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro de conexão",
+        description: "Não foi possível conectar ao servidor. Tente novamente.",
+      });
+    }
     
     setIsLoading(false);
   };

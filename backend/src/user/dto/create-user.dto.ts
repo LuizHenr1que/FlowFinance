@@ -8,12 +8,9 @@ export class CreateUserDto {
   email: string;
 
   @MinLength(8, { message: 'A senha deve ter no mínimo 8 caracteres' })
-  @Matches(
-    /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&\-_])[A-Za-z\d@$!%*#?&\-_]{8,}$/,
-    {
-      message:
-        'A senha deve conter pelo menos 8 caracteres, incluindo letras, números e um caractere especial',
-    },
-  )
+  @Matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\W]{8,}$/, {
+    message:
+      'A senha deve conter pelo menos 8 caracteres, incluindo letras, números e um caractere especial',
+  })
   password: string;
 }
